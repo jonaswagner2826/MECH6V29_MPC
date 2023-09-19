@@ -1,3 +1,10 @@
 Syllabus.pdf
 
 *.asv
+
+*.aux
+*.log
+*.fls
+*.fbd_latexmk
+*.out
+*.toc
