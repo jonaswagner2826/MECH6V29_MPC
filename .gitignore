@@ -5,6 +5,8 @@ Syllabus.pdf
 *.aux
 *.log
 *.fls
-*.fbd_latexmk
+*.fdb_latexmk
 *.out
 *.toc
+*.synctex.gz
+
