@@ -75,9 +75,75 @@
 %% Problem 1
 \newpage
 \section{}
+Problem Data:
 
 % 1a)
 \subsection{}
+Problem Data:
+\begin{equation}
+    \begin{aligned}
+        \mathbf{A} = \mqty[1&1\\0&1] & \mathbf{B} = \mqty[0.5\\1] & \mathcal{W} = \{\vb{w} = \mathbf{B} z \st \abs{z} \leq 0.3\}\\
+        \mathbf{C} = \mqty[1&0\\1&0\\0&0] & \mathbf{D} = \mqty[0\\0\\1] & \mathcal{Y} = \{\vb{y} \in \R^3 \st \norm{\vb{y}}_{\infty} \leq 1\}
+    \end{aligned}
+\end{equation}
+
+Prediction Horizon:
+$N = 10$
+
+Initial Condition:
+$\vb{x}_0 = 0$
+
+% 1b)
+\subsection{Nilpotent candidate controller}
+$\Lambda(\mathbf{A+BK}) = 0$
+
+Result w/ Acker:
+$\vb{K} = \mqty[-1 & -1.5]$
+
+Same as in \cite{}.
+
+
+% 1c)
+\subsection{Output constraint tightening}
+From reference (using different notation):
+\begin{equation}
+    \begin{aligned}
+        \mathcal{Y}_0 = \mathcal{Y}\\
+        \mathcal{Y}_{j+1} = \mathcal{Y}_{j} \ominus (\mathbf{C + DK}) \mathbf{L}_{j} \mathcal{W}, \quad \forall_{j \in \{0,\dots,N-1\}}
+    \end{aligned}
+\end{equation}
+where $\mathbf{L}_{j} = (\mathbf{A+BK})^{j}$.\footnote{not explicitly, but eliminating time-variance that's what it is...}
+
+Or equivalently, using the time-invarience of K and some version of the Cayley-Hamilton theorem, 
+\begin{equation}
+    \mathcal{Y}_{j} = \mathcal{Y} \ominus \bigoplus_{i = 1,\dots,n} (\mathbf{C+DK}) (\mathbf{A+BK})^{i-1}
+\end{equation}
+(eliminating if the power is negative...)
+
+TODO: double check this... (pretty sure this falls under some distributed property...)
+
+For this system,
+$(\mathbf{C+DK}) = \mqty[\vb{I}_2\\\mathbf{K}]$
+
+\begin{equation}
+    \begin{aligned}
+        \mathcal{Y}_0 &= \{\vb{y} \in \R^3 \st \norm{\vb{y}}_{\infty}\leq 1\}\\
+            &= \{\vb{y} \in \R^{3} \st \abs{y_1} \leq 1, \abs{y_2} \leq 1, \abs{y_3}\leq 1\}\\
+        \mathcal{Y}_1 &= \mathcal{Y}_0 \ominus (\mathbf{C+DK}) \mathcal{W}\\
+            &= \mathcal{Y}_0 \ominus \mqty[\vb{I}_2\\\mathbf{K}] \{ \vb{B} w \in \R \st \abs{w} \leq 0.3\}\\
+            &= \{\vb{y} \in \R^{3} \st \abs{y_1} \leq 0.85, \abs{y_2} \leq 0.7, \abs{y_3}\leq 0.4\}\\
+        \mathcal{Y}_1 &= \mathcal{Y}_1 \ominus (\mathbf{C+DK}) \mathbf{(A+BK)}\mathcal{W}\\
+            &= \mathcal{Y}_1 \ominus \mqty[\vb{I}_2\\\mathbf{K}] \{\vb{B} w \in \R \st \abs{w} \leq 0.3\}\\
+            &= \{\vb{y} \in \R^{3} \st \abs{y_1} \leq 0.7, \abs{y_2} \leq 0.4, \abs{y_3}\leq 0.1\}\\
+    \end{aligned}
+\end{equation}
+which is the same for the remaining since $(\mathbf{A+BK})^2 = \vb{0}$.
+
+
+
+
+
+
 
 % \begin{figure}[h]
 %     \centering
