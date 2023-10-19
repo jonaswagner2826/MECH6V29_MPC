@@ -45,6 +45,7 @@ for k = 1:N
     objective = objective + x_{k}'*Q*x_{k} + u_{k}'*R*u_{k};
     constraints = [constraints, x_{k+1} == A*x_{k} + B*u_{k}];
     if robustFlag
+        
         constraints = [constraints, Y_{k}.A*(C*x_{k}+D*u_{k})<= Y_{k}.b];
     else
         constraints = [constraints, Y.A*(C*x_{k}+D*u_{k})<= Y.b];
