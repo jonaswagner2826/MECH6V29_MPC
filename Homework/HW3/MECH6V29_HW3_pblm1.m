@@ -25,12 +25,12 @@ K = -acker(A,B,zeros(nx,1))
 Y = Polyhedron('A', [eye(ny);-eye(ny)], 'b', ones(2*ny,1));
 W = B*Polyhedron('A',[1;-1],'b',[0.3;0.3]);
 
-Y_{1} = Y - (C+D*K)*W;
-for j = 2:N
-    Y_{j} = Y_{j-1} - (C+D*K)*(A+B*K)^(j-1)*W;
+Y_{1} = Y;% - (C+D*K)*W;
+for j = 1:N
+    Y_{j+1} = Y_{j} - (C+D*K)*(A+B*K)^(j-1)*W;
 end
 
-for robustFlag = [true, false]
+for robustFlag = true
 %% 1d ----- Setup Controller
 P=0;
 Q = 1e-3*eye(nx);
@@ -38,21 +38,22 @@ R = 100;
 
 yalmip('clear'); clear('controller');
 u_ = sdpvar(repmat(nu,1,N),ones(1,N));
-x_ = sdpvar(repmat(nx,1,N+1),ones(1,N+1));
+x_ = sdpvar(repmat(nx,1,N),ones(1,N));
 
 constraints = []; objective = 0;
-for k = 1:N
+for k = 1:N-1
     objective = objective + x_{k}'*Q*x_{k} + u_{k}'*R*u_{k};
     constraints = [constraints, x_{k+1} == A*x_{k} + B*u_{k}];
     if robustFlag
-        
         constraints = [constraints, Y_{k}.A*(C*x_{k}+D*u_{k})<= Y_{k}.b];
     else
         constraints = [constraints, Y.A*(C*x_{k}+D*u_{k})<= Y.b];
     end
 end
-constraints = [constraints, x_{k+1} == 0];
-objective = objective + x_{k+1}'*P*x_{k+1};
+k = k + 1;
+constraints = [constraints, x_{k} == 0];
+if robustFlag; constraints = [constraints, Y_{k}.A*(C*x_{k}+D*u_{k})<= Y_{k}.b]; end
+objective = objective + x_{k}'*P*x_{k};
 
 opts = sdpsettings;
 controller = optimizer(constraints,objective,opts,x_{1},u_{1});

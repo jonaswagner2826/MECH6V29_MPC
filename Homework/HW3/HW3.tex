@@ -91,7 +91,7 @@ Prediction Horizon:
 $N = 10$
 
 Initial Condition:
-$\vb{x}_0 = 0$
+$\vb{x}_0 = \mqty[0\\0]$
 
 % 1b)
 \subsection{Nilpotent candidate controller}
@@ -145,133 +145,148 @@ which is the same for the remaining since $(\mathbf{A+BK})^2 = \vb{0}$.
 
 
 
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width = 0.5\textwidth]{figs/pblm1a.png}
-%     \caption{Problem 1a results}
-% \end{figure}
 
-% The transient behavior is pretty reasonable and has a mild overshoot.
-% The maximum output is around 2.5 (2.409) and it appears to initially reach the origin after 4 timesteps but takes around 7 to settle.
 
-% % 1b)
-% \newpage
-% \subsection{}
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width = 0.5\textwidth]{figs/pblm1b.png}
-%     \caption{Problem 1b results}
-% \end{figure}
 
-% The controller is unable to stabilize the system.
 
-% Is it possible to tune the cost function matrices? 
-% Potentially, although I'm not sure how to explicitly prove this either way for every case that this controller would face.
-% I did test multiple versions of the matrices but did not find any that satisfied it.
 
-% % 1c)
-% \newpage
-% \subsection{}
-% The first time step ``solution'' is 0.
-% Looking at error code we find that the controller result is actually is infeasible or unbounded.
 
-% After it runs for a couple time steps with $u=0$, it then becomes feasible and has a solution that ultimately does stabilize the system.
 
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width = 0.5\textwidth]{figs/pblm1c.png}
-%     \caption{Problem 1c results}
-% \end{figure}
 
-% Increasing the time does not appear to solve this issue.
-% Specifically, increasing it incrementally up to 10 saw no difference, and then running it at $N=50$ also demonstrated no changes.
 
-% % 1d)
-% \newpage
-% \subsection{}
-% % \begin{figure}[h]
-% %     \centering
-% %     \includegraphics[width = 0.5\textwidth]{figs/pblm1d.png}
-% %     \caption{Problem 1d initial results (just w/ a slack variable)}
-% % \end{figure}
 
-% I ran this for many different time-horrizons (and the slack variable was weighted with a gain of 100).
-% A few of these are included here (the rest available on github).
-% Essential takeaway is that the extension of time-horizon allows for a less extreme peak output value and longer period that the output constraint is maintained.
-% Additionally, the specific note of combining the two is that feasibility becomes a much larger concern but at a minimum, the constraint at $x_N = 0$ ensures stability (although a slack variable should also be added to ensure feasibility).
 
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width=0.3\textwidth]{figs/pblm1d_N=2.png}
-%     \includegraphics[width=0.3\textwidth]{figs/pblm1d_N=4.png}
-%     \includegraphics[width=0.3\textwidth]{figs/pblm1d_N=6.png}
-%     \includegraphics[width=0.3\textwidth]{figs/pblm1d_N=8.png}
-%     \includegraphics[width=0.3\textwidth]{figs/pblm1d_N=10.png}
-%     \includegraphics[width=0.3\textwidth]{figs/pblm1d_N=15.png}
-% \end{figure}
 
-% \newpage
 
-% %% Problem 2
-% \newpage
-% \section{}
-% \[
-%     A = \mqty[2&1\\0&2] \quad B = \mqty[1&0\\0&1]
-% \]\[
-%     \mathcal{X} = \{x \in \R^2 \st \mqty[1&0] x \leq 5\}
-% \]\[
-%     \mathcal{U} = \{u \in \R^2 \st -\vb{1} \leq u \leq \vb{1}\}
-% \]
-% Note: $\mathcal{X} = \{x \in \R^2 \st x_1 \leq 5\}$ 
-% and $\mathcal{U} = \{u \in \R^2 \st \norm{u}_{\infty} \leq 1\}$
 
-% Or (in H-rep) $\mathcal{X} = \{\mqty[1&0], 5\}$ 
-% and $\mathcal{U} = \{\mqty[\vb{I}_2\\-\vb{I}_2], \mqty[\vb{1}_2\\\vb{1}_2]\}$
 
-% % 2a)
-% \subsection{}
-% Running it for many different values of alpha resulted in the following:
 
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width=0.3\textwidth]{figs/pblm2a_alpha=1e-01.png}
-%     \includegraphics[width=0.3\textwidth]{figs/pblm2a_alpha=5e-01.png}
-%     \includegraphics[width=0.3\textwidth]{figs/pblm2a_alpha=1e+00.png}
-%     \includegraphics[width=0.3\textwidth]{figs/pblm2a_alpha=2e+00.png}
-%     \includegraphics[width=0.3\textwidth]{figs/pblm2a_alpha=1e+01.png}
-% \end{figure}
-% When $\alpha = 0.1$ the system is unstable.
 
-% % 2b)
-% \newpage
-% \subsection{}
-% When implementing the state and input constraints, the closed loop system is still unstable.
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width=0.7\textwidth]{figs/pblm2b}
-% \end{figure}
-% Additionally, the results become infeasible once it diverges from the origin too much.
 
-% % 2c)
-% \newpage
-% \subsection{}
-% Implementing it with the $x_N = 0$ constraint allows it to be stable (and feasibility issues disappear).
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width=0.7\textwidth]{figs/pblm2c}
-% \end{figure}
 
-% % 2d)
-% \newpage
-% \subsection{}
-% I had a lot of difficulty getting the batch method to work correctly (see matlab)...
-% The specific results requested are here:
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width=0.7\textwidth]{figs/pblm2d.png}
-% \end{figure}
 
-% The recursive approach was faster as expected (0.16s vs 0.38s).
+
+
+
+
+
+
+%% Problem 2
+\newpage
+\section{}
+Problem Data:
+\begin{equation}
+    \begin{aligned}
+        \mathbf{A} = \mqty[1&1\\0&1] & \mathbf{B} = \mqty[0.5\\1] & \mathcal{W} = \{\vb{w} = \mathbf{B} z \st \abs{z} \leq 0.3\}\\
+        \mathbf{C} = \mqty[1&0\\1&0\\0&0] & \mathbf{D} = \mqty[0\\0\\1] & \mathcal{Y} = \{\vb{y} \in \R^3 \st \norm{\vb{y}}_{\infty} \leq 1\}
+    \end{aligned}
+\end{equation}
+
+Prediction Horizon:
+$N = 10$
+
+Initial Condition:
+$\vb{x}_0 = \mqty[0\\0]$
+
+Candidate Feedback Controller:
+$K = \mqty[-1 & -1.5]$
+
+% 1a)
+\subsection{Set Definitions}
+\textbf{State/Input Constraints:}
+From the output constraints the individual state/input constraints can be found by satisfying
+$C \mathcal{X} = \mathcal{Y} \ominus D \mathcal{U}$
+and 
+$D \mathcal{U} = \mathcal{Y} \ominus C \mathcal{X}$;
+but $C$ and $D$ would have to be invertible for a direct solution, so I'm not sure if it's good.
+
+TODO: double check this...
+
+Alternatively, we can look at the individual dimensions/values and do it simply by observation as we can decompose the dimensions:
+\begin{equation}
+    \begin{aligned}
+        \mathcal{X} &= \{x \in \R^n \st \norm{C x}_\infty \leq 1\} 
+            = \{x \in \R^n \st \abs{x_1} \leq 1, \ \abs{x_2} \leq 1\}\\
+        \mathcal{U} &= \{u \in \R^m \st \norm{D u}_\infty \leq 1\}
+            = \{u \in \R^m \st \abs{u_1} \leq 1\}
+    \end{aligned}
+\end{equation}
+
+In H-rep this becomes:
+\begin{equation}
+    \begin{aligned}
+        \mathcal{X} &= \qty{A = \mqty[\vb{I}_2\\-\vb{I}_2], \ b = \mqty[1\\1]}\\
+        \mathcal{U} &= \qty{A = \mqty[1\\-1], \ b = \mqty[1\\1]}
+    \end{aligned}
+\end{equation}
+
+\textbf{Disturbance Set:}
+$\mathcal{W}$ is defined by 
+\begin{equation}
+    \mathcal{W} = \{\vb{w} = \mathbf{B} z \st \abs{z} \leq 0.3\}
+\end{equation}
+and in H-rep it becomes
+\begin{equation}
+    \mathcal{W} = \qty{A = \mqty[B\\-B], \ b = \mqty[0.3\\0.3]}
+\end{equation}
+
+\newpage
+% 2b)
+\subsection{RPI Sets}
+Constructing the RPI set was done in MATLAB following process in provided code (as instructed):
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/pblm2b_1.png}\\
+    \includegraphics[width=0.5\textwidth]{figs/pblm2b_2.png}
+    \caption{First one is the iterative portion and the second one is the one using the provided Approx\_RPI() function}
+\end{figure}
+
+Testing different epsilon values resulted in an RPI set that didn't look all that different and the vertices all appeared to line up. 
+(Tested many epsilon values all less than 1)
+
+The result of $Z$ is calculated in MATLAB as:
+\begin{equation}
+    Z = \mqty[
+        0.8639  & -0.4319 & 0.2592 \\
+        0.8639  & 0.4319  & 0.2592 \\
+        -0.8639 & 0.4319  & 0.2592 \\
+        -0.8639 & -0.4319 & 0.2592 ]
+\end{equation}
+
+\newpage
+% 2c)
+\subsection{Tightened Input/Output Constraint Sets}
+From \cite{}, the disturbance invarient set for $x_{k+1} = A_K x_k + w$ is defined by $A_K Z \oplus W \subseteq Z$, where $A_K = A + B*K$ is stable.
+
+This $Z$ is the RPI set for $x_{k+1} = A_K x_k + w$.
+The proposition from the reference says that if $x_k \in \bar{x}_k$ and $u_k \in \bar{u}_k + K(x - \bar{x})$, then $x_{k+1} \in \bar{x}_{k+1} \oplus Z$ $\forall_{w_k \in W}$.
+Where $x_{k+1} = A x_{k} + B u_{k} + w_k$. 
+\footnote{some of the time-invarience isn't included}
+
+Result makes it so that $u_k = \bar{u}_k + K (x_k = \bar{x}_k)$ keeps the state close to the nominal one.
+\footnote{this also means it can ensure that it satisfies state/input constraints as well}
+
+The new state and input constraints are based on $Z_k$ for each time-step.
+
+To ensure that $x^*_k = x_k \oplus Z$ satisfies the original constraint set, the new constraints of 
+\begin{equation}
+    \bar{\mathcal{X}} = \mathcal{X} \ominus Z = \qty{x \in \R^2 \st \abs{x_1} \leq 0.7, \abs{x_2} \leq 0.4}
+\end{equation}
+
+For the input, the state constraints are satisfied as 
+\begin{equation}
+    \bar{\mathcal{U}} = \mathcal{U} \ominus K Z = \qty{u \in \R \st \abs{u} \leq 0.1}
+\end{equation}
+
+As expected, both constraint sets are smaller than the original sets.
+
+% 2d)
+\subsection{Controller Formulation}
+The controller is now described differently then before in a different way.
+
+
+
+
 
 
 \newpage
