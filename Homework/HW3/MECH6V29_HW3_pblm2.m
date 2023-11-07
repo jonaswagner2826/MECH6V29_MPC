@@ -1,5 +1,7 @@
 %% MECH 6V29 - MPC - Homework 3
 %% Problem 2
+clear
+close all
 
 %% 2a
 A = [1, 1;
@@ -62,71 +64,82 @@ Z = F_approx;
 X_bar = X - Z; X_bar.minHRep;
 U_bar = U - K*Z; U_bar.minHRep;
 
-%% 2d - new controller
+%% 2d ----- Setup Controller
+P=0;
+Q = 1e-3*eye(nx);
+R = 100;
+
+yalmip('clear'); clear('controller');
+u_bar_ = sdpvar(repmat(nu,1,N),ones(1,N));
+x_bar_ = sdpvar(repmat(nx,1,N+1),ones(1,N+1));
+x_1 = sdpvar(nx,1);
+u_1 = sdpvar(nu,1);
+
+constraints = []; objective = 0;
+constraints = [constraints,Z.A*(x_bar_{1}-x_1) <= Z.b];
+% constraints = [constraints, Z.A*x_bar_{1} <= Z.b]; %<-- initial condition constraint
+for k = 1:N
+    objective = objective + x_bar_{k}'*Q*x_bar_{k} + u_bar_{k}'*R*u_bar_{k};
+    constraints = [constraints, x_bar_{k+1} == A*x_bar_{k} + B*u_bar_{k}];
+    constraints = [constraints, X_bar.A*x_bar_{k} <= X_bar.b];
+    constraints = [constraints, U_bar.A*u_bar_{k} <= U_bar.b];
+end
+constraints = [constraints, Z.A*(x_bar_{k+1}+0)<= Z.b];
+objective = objective + x_bar_{k+1}'*P*x_bar_{k+1};
+
+constraints = [constraints, u_1 == u_bar_{1} + K*(x_1 - x_bar_{1})];
+
+opts = sdpsettings;
+controller = optimizer(constraints,objective,opts,x_1,u_1);
+
+%% 2e ----- Simulation
+clear X U
+for i = 1:100
+    rng(i);
+    x0 = zeros(nx,1); tf = 100;
+    V = num2cell(0.6*rand(nx,tf)-0.3);
+    [X{i},U{i},~] = run_sim(A,B,V,controller, x0, tf);
+end
+
+%% Ploting
+fig = figure(...
+        WindowStyle="normal",...
+        Position=[0 0 750 500]);
+% States
+subplot(2,1,1); hold on;
+yline(1,'k'); yline(-1,'k');
+ylabel('Position');
+xlabel('Time');
+xlim([1,100]);
+for i = 1:length(X); plot(X{i}(1,:),'k'); end
+% Input
+subplot(2,1,2); hold on;
+yline(1,'k'); yline(-1,'k');
+ylabel('Input');
+xlabel('Time');
+xlim([1,100]);
+for i = 1:length(U); plot(U{i}(1,:),'k'); end
+
+% save fig
+sgtitle('Tube MPC Approch')
+saveas(fig,strcat('figs',filesep,'pblm2e_results','.png'));
 
 
+%% 2f ------- Result Analysis
+% Cost
+J_{100} = [];
 
+for i = 1:100
+    J_{i} = 0;
+    for k = 1:tf-1
+        J_{i} = J_{i} + X{i}(:,k)'*Q*X{i}(:,k) + U{i}(:,k)'*R*U{i}(:,k);
+    end
+    J_{i} = J_{i} + X{i}(:,k+1)'*P*X{i}(:,k+1);
+end
+J = [J_{:}];
 
-
-
-
-% Y_{1} = Y - (C+D*K)*W;
-% for j = 2:N
-%     Y_{j} = Y_{j-1} - (C+D*K)*(A_K)^(j-1)*W;
-% end
-% 
-% for robustFlag = [true, false]
-% %% 1d ----- Setup Controller
-% P=0;
-% Q = 1e-3*eye(nx);
-% R = 100;
-% 
-% yalmip('clear'); clear('controller');
-% u_ = sdpvar(repmat(nu,1,N),ones(1,N));
-% x_ = sdpvar(repmat(nx,1,N+1),ones(1,N+1));
-% 
-% constraints = []; objective = 0;
-% for k = 1:N
-%     objective = objective + x_{k}'*Q*x_{k} + u_{k}'*R*u_{k};
-%     constraints = [constraints, x_{k+1} == A*x_{k} + B*u_{k}];
-%     if robustFlag
-% 
-%         constraints = [constraints, Y_{k}.A*(C*x_{k}+D*u_{k})<= Y_{k}.b];
-%     else
-%         constraints = [constraints, Y.A*(C*x_{k}+D*u_{k})<= Y.b];
-%     end
-% end
-% constraints = [constraints, x_{k+1} == 0];
-% objective = objective + x_{k+1}'*P*x_{k+1};
-% 
-% opts = sdpsettings;
-% controller = optimizer(constraints,objective,opts,x_{1},u_{1});
-% 
-% 
-% % simulate and plot
-% fig = figure(...
-%         WindowStyle="normal",...
-%         Position=[0 0 750 500]);
-% hold on
-% for i = 1:100
-%     rng(i);
-%     x0 = zeros(nx,1); tf = 100;
-%     V = num2cell(0.6*rand(nx,tf)-0.3);
-%     [X{i},U{i},~] = run_sim(A,B,V,controller, x0, tf);
-%     k_fail = find(~isfinite(U{i}),1,"first");
-%     plot(X{i}(1,:),'k')
-%     plot(k_fail,X{i}(1,k_fail),'ko')
-% end
-% yline(1,'k'); yline(-1,'k');
-% ylabel('Position');
-% xlabel('Time');
-% title(sprintf('robustFlag = %d',robustFlag))
-% saveas(fig,strcat('figs',filesep,sprintf('pblm1_robust=%d',robustFlag),'.png'));
-% 
-% end
-
-
-
+J_mean = mean(J)
+J_max = max(J)
 
 
 %% Local functions

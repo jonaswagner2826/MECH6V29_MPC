@@ -132,44 +132,30 @@ $(\mathbf{C+DK}) = \mqty[\vb{I}_2\\\mathbf{K}]$
         \mathcal{Y}_1 &= \mathcal{Y}_0 \ominus (\mathbf{C+DK}) \mathcal{W}\\
             &= \mathcal{Y}_0 \ominus \mqty[\vb{I}_2\\\mathbf{K}] \{ \vb{B} w \in \R \st \abs{w} \leq 0.3\}\\
             &= \{\vb{y} \in \R^{3} \st \abs{y_1} \leq 0.85, \abs{y_2} \leq 0.7, \abs{y_3}\leq 0.4\}\\
-        \mathcal{Y}_1 &= \mathcal{Y}_1 \ominus (\mathbf{C+DK}) \mathbf{(A+BK)}\mathcal{W}\\
+        \mathcal{Y}_2 &= \mathcal{Y}_1 \ominus (\mathbf{C+DK}) \mathbf{(A+BK)}\mathcal{W}\\
             &= \mathcal{Y}_1 \ominus \mqty[\vb{I}_2\\\mathbf{K}] \{\vb{B} w \in \R \st \abs{w} \leq 0.3\}\\
             &= \{\vb{y} \in \R^{3} \st \abs{y_1} \leq 0.7, \abs{y_2} \leq 0.4, \abs{y_3}\leq 0.1\}\\
     \end{aligned}
 \end{equation}
 which is the same for the remaining since $(\mathbf{A+BK})^2 = \vb{0}$.
 
+% 1d)
+\subsection{Controller Implementation}
+Using everything provided, the controller was implimented in YALMIP as described.
 
+% 1e)
+\subsection{Closed-loop Simulation}
+The system was simulated in MATLAB and the figures requested were recreated:
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figs/pblm1_robust=0.png}\\
+    \includegraphics[width=0.7\textwidth]{figs/pblm1_robust=1.png}\
+    \caption{Recreated results from output constraint tightening.}
+\end{figure}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+% 1f)
+\subsection{Simulation Result Analysis}
+The results for the Tube-MPC approach was a mean of $239$ and max of $357$.
 
 %% Problem 2
 \newpage
@@ -282,7 +268,30 @@ As expected, both constraint sets are smaller than the original sets.
 
 % 2d)
 \subsection{Controller Formulation}
-The controller is now described differently then before in a different way.
+The controller is now described differently then before as follows:
+Using the RPI set and newly derived tightened state/input constraints, the nominal trajectory values are derived in the same way as before.
+Then the difference from nominal has the feedback gain to correct it.
+(Summarized in previous subsections)
+
+\newpage
+% 2e)
+\subsection{Simulation}
+The system was simulated in MATLAB.
+Results requested:
+\begin{figure}[h]
+    \centering
+    \includegraphics[width = 0.7\textwidth]{figs/pblm2e_results.png}
+    \caption{Simulation results of Tube-MPC method}
+\end{figure}
+
+% 2f)
+\subsection{Result Analysis}
+The results for the Tube-MPC approach was a mean of $1465$ and max of $1973$.
+
+Compared to the constraint tightened approach this was much higher in terms of cost.
+I'm not certain why this is, but my guess is because the input is not directly tied to the cost-function in the 2nd approach. 
+It is also possible that I did the 2nd-approach incorrectly and I was supposed to account for the actual input signal; although I'm not sure.
+
 
 
 
@@ -298,9 +307,9 @@ See my github repo for all my course related materials:
 
 \subsection{Matlab results}
 MATLAB code and results are attached.
-% \includepdf[pages=-]{HW2.pdf}
-% \includepdf[pages=-]{html/HW2_pblm1.pdf}
-% \includepdf[pages=-]{html/HW2_pblm2.pdf}
+% \includepdf[pages=-]{html/MECH6V29_HW3.pdf}
+\includepdf[pages=-]{html/MECH6V29_HW3_pblm1.pdf}
+\includepdf[pages=-]{html/MECH6V29_HW3_pblm2.pdf}
 
 
 \end{document}

@@ -1,5 +1,7 @@
 %% MECH 6V29 - MPC - Homework 3
 %% Problem 1
+clear
+close all
 
 % 1a
 A = [1, 1;
@@ -30,7 +32,7 @@ for j = 1:N
     Y_{j+1} = Y_{j} - (C+D*K)*(A+B*K)^(j-1)*W;
 end
 
-for robustFlag = true
+for robustFlag = [false, true]
 %% 1d ----- Setup Controller
 P=0;
 Q = 1e-3*eye(nx);
@@ -79,6 +81,22 @@ xlabel('Time');
 title(sprintf('robustFlag = %d',robustFlag))
 saveas(fig,strcat('figs',filesep,sprintf('pblm1_robust=%d',robustFlag),'.png'));
 
+%% Result Analysis
+% Cost
+J_{100} = [];
+
+for i = 1:100
+    J_{i} = 0;
+    for k = 1:tf-1
+        J_{i} = J_{i} + X{i}(:,k)'*Q*X{i}(:,k) + U{i}(:,k)'*R*U{i}(:,k);
+    end
+    J_{i} = J_{i} + X{i}(:,k+1)'*P*X{i}(:,k+1);
+end
+J = [J_{:}];
+
+J_mean = mean(J)
+J_max = max(J)
+
 end
 
 
@@ -86,30 +104,6 @@ end
 
 
 %% Local functions
-% function controller = mpc_yalmip_controller(A,B,P,Q,R,N,cons,cons_f)
-%     yalmip('clear')
-%     nx = size(A,1);
-%     nu = size(B,2);
-% 
-%     u_ = sdpvar(repmat(nu,1,N),ones(1,N));
-%     x_ = sdpvar(repmat(nx,1,N+1),ones(1,N+1));
-%     s_ = sdpvar(ones(1,N+1),ones(1,N+1));
-% 
-%     constraints = [];
-%     objective = 0;
-%     for k = 1:N
-%         objective = objective + x_{k}'*Q*x_{k} + u_{k}'*R*u_{k} + s_{k};
-%         constraints = [constraints, s_{k} >= 0];
-%         constraints = [constraints, x_{k+1} == A*x_{k} + B*u_{k}];
-%         constraints = [constraints, cons(x_{k+1},u_{k},s_{k})];
-%     end
-%     constraints = [constraints,cons_f(x_{k+1},u_{k},s_{k})];
-%     objective = objective + x_{k+1}'*P*x_{k+1};
-% 
-%     opts = sdpsettings;
-%     controller = optimizer(constraints,objective,opts,x_{1},u_{1});
-% end
-
 function [X,U,diagnostics_] = run_sim(A,B,V,controller,x0, tf)
     
     X_{tf+1} = []; U_{tf} = []; diagnostics_{tf} = [];
@@ -120,19 +114,4 @@ function [X,U,diagnostics_] = run_sim(A,B,V,controller,x0, tf)
     end
     X = [X_{:}]; U = [U_{:}];
 end
-
-% function fig = plot_trajectory(X, U)
-%     fig = figure(...
-%         WindowStyle="normal",...
-%         Position=[0 0 750 500]);
-%     hold on; grid on;
-%     subplot(2,1,1);
-%     stairs(X')
-%     title('State Trajectory')
-%     legend({'x_1','x_2'})
-%     subplot(2,1,2);
-%     stairs(U');
-%     title('Input Trajectory')
-%     legend({'u_1'})
-% end
 
