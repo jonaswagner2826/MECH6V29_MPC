@@ -1,7 +1,7 @@
 % \documentclass[]{article}
-% \documentclass[onecolumn]{IEEEtran}
+\documentclass[onecolumn]{IEEEtran}
 % onecolumn for readability
-\documentclass[]{IEEEtran}
+% \documentclass[]{IEEEtran}
 
 % -----------------------------------------------------
 % Preamble
@@ -129,9 +129,9 @@ The first state, tire deflection ($x_1$), was often exceeding the acceptable sta
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_open_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_open_roadBumpHole.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_open_roadSingleBump.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_open_roadRamps.png}
-    \caption{Open-loop dynamics for the IRI\_737b  and roadBumpHole road profiles.} \label{fig:open-loop}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_open_roadSingleBump.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_open_roadRamps.png}
+    \caption{Open-loop dynamics for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:open-loop}
 \end{figure}
 
 
@@ -162,27 +162,27 @@ The simulations are provided in \autoref{fig:lqr_accel}, \autoref{fig:lqr_bounds
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_accel_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_accel_roadBumpHole.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_accel_roadRamps.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_accel_roadSingleBump.png}
-    \caption{LQR closed-loop dynamics with $Q_{accel}$ and $R$ for the IRI\_737b  and roadBumpHole road profiles.} \label{fig:lqr_accel}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_accel_roadRamps.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_accel_roadSingleBump.png}
+    \caption{LQR closed-loop dynamics with $Q_{accel}$ and $R$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:lqr_accel}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_bounds_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_bounds_roadBumpHole.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_bounds_roadRamps.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_bounds_roadSingleBump.png}
-    \caption{LQR closed-loop dynamics with $Q_bounds$ and $R$ for the IRI\_737b  and roadBumpHole road profiles.} \label{fig:lqr_bounds}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_bounds_roadRamps.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_bounds_roadSingleBump.png}
+    \caption{LQR closed-loop dynamics with $Q_bounds$ and $R$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:lqr_bounds}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_both_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_both_roadBumpHole.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_both_roadRamps.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_both_roadSingleBump.png}
-    \caption{LQR closed-loop dynamics with $Q_both$ and $R$ for the IRI\_737b  and roadBumpHole road profiles.} \label{fig:lqr_both}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_both_roadRamps.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_both_roadSingleBump.png}
+    \caption{LQR closed-loop dynamics with $Q_both$ and $R$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:lqr_both}
 \end{figure}
 
 Each of these lqr control schemes had a noticeable improvement in dampening transient response.
@@ -210,9 +210,9 @@ As can be seen in \autoref{fig:mpc_N15_dt1_d0_r0}, the case where the prediction
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=1_rFlag=0_dFlag=0_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=1_rFlag=0_dFlag=0_roadBumpHole.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=1_rFlag=0_dFlag=0_roadRamps.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=1_rFlag=0_dFlag=0_roadSingleBump.png}
-    \caption{Closed-loop dynamics with no disturbance information for standard MPC using $Q_both$ and $R$ updating every time-step with $N=15$ for the IRI\_737b and roadBumpHole road profiles.} \label{fig:mpc_N15_dt1_d0_r0}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=1_rFlag=0_dFlag=0_roadRamps.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=1_rFlag=0_dFlag=0_roadSingleBump.png}
+    \caption{Closed-loop dynamics with no disturbance information for standard MPC using $Q_both$ and $R$ updating every time-step with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt1_d0_r0}
 \end{figure}
 
 By comparison, as seen in \autoref{fig:mpc_N15_dt3_d0_r0}, predicting forward in increments of 3 time-steps is far less oscillatory; however this is also dependent on what $N$ is.
@@ -221,9 +221,9 @@ By comparison, as seen in \autoref{fig:mpc_N15_dt3_d0_r0}, predicting forward in
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=0_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=0_roadBumpHole.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=0_roadRamps.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=0_roadSingleBump.png}
-    \caption{Closed-loop dynamics with no disturbance information for standard MPC using $Q_both$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b and roadBumpHole road profiles.} \label{fig:mpc_N15_dt3_d0_r0}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=0_roadRamps.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=0_roadSingleBump.png}
+    \caption{Closed-loop dynamics with no disturbance information for standard MPC using $Q_both$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d0_r0}
 \end{figure}
 
 \subsection{Disturbance knowledge Comparison}
@@ -240,18 +240,18 @@ A direct comparison can be seen in \autoref{fig:mpc_N15_dt3_d1_r0},\autoref{fig:
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=1_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=1_roadBumpHole.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=1_roadRamps.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=1_roadSingleBump.png}
-    \caption{Closed-loop dynamics with partial disturbance information for standard MPC using $Q_both$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b and roadBumpHole road profiles.} \label{fig:mpc_N15_dt3_d1_r0}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=1_roadRamps.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=1_roadSingleBump.png}
+    \caption{Closed-loop dynamics with partial disturbance information for standard MPC using $Q_both$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d1_r0}
 \end{figure}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=2_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=2_roadBumpHole.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=2_roadRamps.png}
-    % \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=2_roadSingleBump.png}
-    \caption{Closed-loop dynamics with full disturbance information for standard MPC using $Q_both$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b and roadBumpHole road profiles.} \label{fig:mpc_N15_dt3_d2_r0}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=2_roadRamps.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=2_roadSingleBump.png}
+    \caption{Closed-loop dynamics with full disturbance information for standard MPC using $Q_both$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d2_r0}
 \end{figure}
 
 \newpage
@@ -267,10 +267,27 @@ A naive approach (something I have done prior to taking this course) is to direc
 To fix this issue (something I did do prior to taking this class) would be to use those constraints instead as what I referred to as ``soft'' constraints within the objective function.
 This was also tested, although disregarded, since we had already learned better solutions (namely the constraint tightening and tube MPC approaches).
 
-Although I intuitively understand the constraint tightening approach more, the coding/implementation for the RPI sets is simpler\footnote{not a great reason, but it's why I made the choice I did}, thus this was implemented.
+Although I intuitively understand the constraint tightening approach more, the implementation for the RPI sets is simpler to implemented\footnote{not a great reason, but it's why I made the choice I did}, thus this was implemented.
+
+From the reference text \cite{MAYNE2005219}, the 
 
 
 
+
+
+
+
+
+%%%%%%%%%%%%%%
+% Refrences
+%%%%%%%%%%%%%%
+
+
+
+
+
+\newpage
+\appendix
 
 
 

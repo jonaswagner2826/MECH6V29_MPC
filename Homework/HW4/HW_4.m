@@ -150,11 +150,6 @@ end
 end
 
 
-%% Robust things:
-% Reachability Analysis (Optional)
-
-% Invariant Set (Optional)
-
 
 
 
@@ -167,6 +162,20 @@ rFlag = 1; % 0 = nominal, 1 = ...
 % for dt_MPC = [1, 2, 3, 4, 5, 10].*dt
 % for N = [2, 3, 5, 10, 15]
 
+% Choose what the MPC controller knows (0 - no disturbance, 1 - current
+% distrubance, 2 - full disturbance preview)
+% dFlag = 0; % 0 = nominal, 1 = next distrubance, 2 = entire horizon
+
+for dFlag = [0,1,2]
+
+
+%% Robust things:
+% Reachability Analysis (Optional)
+
+% Invariant Set (Optional)
+
+
+%% Controller Design
 if true
 % mpc_test = 'mpc_bounded';
 for mpc_test = "mpc_both"%["mpc_accel","mpc_bounds","mpc_both"]
@@ -187,56 +196,86 @@ P = Q; %<--- same terminal cost (no final-state constraint)
 % Resample discrete-time model with MPC time step
 sys_MPC = d2d(sys_d, dt_MPC);
 
-
-% Constraint Tightening
-K_nipotent = -acker(sys_MPC.A,sys_MPC.B(:,1),zeros(nx,1));
-Y_set = C*X_set + D*U_set + W*D_set; Y_set.minHRep;
-
-Y_{1} = Y_set;
-for j = 1:N
-    Y_{j+1} = Y_{j} - ...
-        ((C+sys_MPC.D(:,1)*K_nipotent)*...
-            (sys_MPC.A+sys_MPC.B(:,1)*K_nipotent)^(j-1))*...
-                sys_MPC.B(:,2:3)*D_set - W*D_set;
-    Y_{j}.minHRep;
-end
-
-% YALMIP variables
-yalmip('clear'); clear('controller');
-x_ = sdpvar(repmat(nx,1,N+1),ones(1,N+1));
-u_ = sdpvar(repmat(nu,1,N),ones(1,N));
-d_ = sdpvar(repmat(nd,1,N),ones(1,N));
-
-% Time-evolution
-constraints = []; objective = 0;
-for k = 1:N
-    % Cost Function
-    objective = objective + x_{k}'*Q*x_{k} + u_{k}'*R*u_{k};
-    % System Time-step Constraints
-    constraints = [constraints, x_{k+1} == sys_MPC.A*x_{k} + sys_MPC.B*[u_{k};d_{k}]];
-    if rFlag
-        constraints = [constraints, X_set.A*x_{k} <= X_set.b];
-        constraints = [constraints, U_set.A*u_{k} <= U_set.b];
-        constraints = [constraints, Y_{k}.A*(C*x_{k}+D*u_{k}+W*d_{k})<=Y.b];
+%% Controller Setup
+if ~rFlag
+    % YALMIP variables
+    yalmip('clear'); clear('controller');
+    x_ = sdpvar(repmat(nx,1,N+1),ones(1,N+1));
+    u_ = sdpvar(repmat(nu,1,N),ones(1,N));
+    d_ = sdpvar(repmat(nd,1,N),ones(1,N));
+    
+    % Time-evolution
+    constraints = []; objective = 0;
+    for k = 1:N
+        % Cost Function
+        objective = objective + x_{k}'*Q*x_{k} + u_{k}'*R*u_{k};
+        % System Time-step Constraints
+        constraints = [constraints, x_{k+1} == sys_MPC.A*x_{k} + sys_MPC.B*[u_{k};d_{k}]];
     end
-end
-objective = objective + x_{k+1}'*P*x_{k+1};
-constraints = [constraints, X_set.A*x_{k+1} <= X_set.b];
+    objective = objective + x_{k+1}'*P*x_{k+1};
+    constraints = [constraints, X_set.A*x_{k+1} <= X_set.b];
+    
+    % controller def
+    controller = optimizer(constraints,objective,sdpsettings('solver','gurobi'),[x_(1)',d_(:)'],[u_{1}]);
 
-% controller def
-controller = optimizer(constraints,objective,sdpsettings('solver','gurobi'),[x_(1)',d_(:)'],[u_{1}]);
+else
+    % Controller and setup
+    K_nipotent = -acker(sys_MPC.A,sys_MPC.B(:,1),zeros(nx,1));
+    A_K = sys_MPC.A + sys_MPC.B(:,1)*K_nipotent; %<--- only u_1
+    W_rpi = sys_MPC.B(:,2)*(D_set.projection(1)); %<--- only d_1 inputs into state equation
+    
+    epsilon = 1;
+    Z = Approx_RPI(A_K,W_rpi,epsilon); Z.minHRep;
+
+    X_bar = X_set - Z; X_bar.minHRep;
+    U_bar = U_set - K_nipotent*Z; U_bar.minHRep;
+
+    % YALMIP vars
+    yalmip('clear'); clear('controller');
+    x_bar_ = sdpvar(repmat(nx,1,N+1),ones(1,N+1));
+    u_bar_ = sdpvar(repmat(nu,1,N),ones(1,N));
+    x_1 = sdpvar(nx,1);
+    u_1 = sdpvar(nu,1);
+    d_ = sdpvar(repmat(nd,1,N),ones(1,N));
+    d_bar_ = sdpvar(repmat(nd,1,N),ones(1,N));
+    
+    constraints = []; objective = 0;
+    constraints = [constraints, Z.A*(x_1 - x_bar_{1}) <= Z.b];
+    % constraints = [constraints, Z.A*x_bar_{1} <= Z.b]; %<-- initial condition constraint
+    for k = 1:N
+        objective = objective + x_bar_{k}'*Q*x_bar_{k} + u_bar_{k}'*R*u_bar_{k};
+        constraints = [constraints, X_bar.A*x_bar_{k} <= X_bar.b];
+        constraints = [constraints, U_bar.A*u_bar_{k} <= U_bar.b];
+        constraints = [constraints, x_bar_{k+1} == ...
+            sys_MPC.A*x_bar_{k} + sys_MPC.B(:,1)*u_bar_{k};% + sys_MPC.B(:,2)*d_{k}(1)];
+        switch dFlag
+            case 0
+                constraints = [constraints, D_set.A*d_bar_{k} <= D_set.b];
+            case {1,2}
+                constraints = [constraints, d_bar_{k} == d_{k}];
+        end
+
+    end
+    constraints = [constraints, Z.A*(x_bar_{k+1}+0)<= Z.b];
+    objective = objective + x_bar_{k+1}'*P*x_bar_{k+1};
+
+    
+    opts = sdpsettings;
+    % controller = optimizer(constraints,objective,opts,[{x_1},d_(:)'], u_1);
+    controller = optimizer(constraints,objective,opts,[{x_1},d_(:)'], {u_bar_{1},x_bar_{1}});
+end
+
 
 %% Closed-loop MPC Simulation
 
-% Choose what the MPC controller knows (0 - no disturbance, 1 - current
-% distrubance, 2 - full disturbance preview)
-% dFlag = 0; % 0 = nominal, 1 = next distrubance, 2 = entire horizon
-
-for dFlag = [0,1,2]
-
 z_all = [z0dot;z0];
 
-[X,Y,U] = run_sim(sys_d, z_all, controller, x0, tspan, N, dt_MPC, dFlag);
+[X,Y,U] = run_sim(sys_d, z_all, controller, x0, tspan, N, dt_MPC, dFlag, rFlag);
+
+
+
+
+
 
 % Plot all simulation data
 plotActiveSuspension(tspan(1:end-1),U',X',Y',bounds)
@@ -310,12 +349,15 @@ end
 
 
 %% Local functions
-function [X,Y,U] = run_sim(sys, d_all, controller, x0, tspan, N, dt_MPC, dFlag)
+function [X,Y,U] = run_sim(sys, d_all, controller, x0, tspan, N, dt_MPC, dFlag, rFlag)
 
     [A,B,C,D] = ssdata(sys);
     nd = size(d_all,1);
+    nx = size(A,1); nu = size(B,2) - nd;
     dt = tspan(2)-tspan(1);
     d_all = [d_all, d_all(:,1:N)];%<--- assuming restart...
+
+    if rFlag; K = - acker(A,B(:,1),zeros(nx,1)); end
 
     X_{1} = x0;
     for k = 1:length(tspan)-1
@@ -331,7 +373,15 @@ function [X,Y,U] = run_sim(sys, d_all, controller, x0, tspan, N, dt_MPC, dFlag)
                 case 2
                     V = mat2cell(d_all(:,k + (1:N)),nd,ones(1,N));
             end
-            u = controller{X_{k},V{:}};
+            results = controller{X_{k},V{:}};
+            switch rFlag
+                case 0
+                    u = results{1};
+                case 1
+                    u_bar = results{1}; x_bar = results{2};
+                    u = u_bar + K*(X_{k} - x_bar);
+            end
+
             % [u,diagnostics] = controller{X_{k},V{:}};
             % if diagnostics ~= 0; error('not feasible'); end
         end
