@@ -74,9 +74,9 @@ v = 10;                                 % vehicle velocity (m/s) (will change th
 % load roadRamps                        % road profile data (multiple large ramps)
 % load roadSingleBump                   % road profile data (one bump)
 % load roadBumpHole                     % road profile data (one bump and one hole)
-% roadProfile = 'roadRamps';
 
-for roadProfile = ["IRI_737b","roadRamps","roadSingleBump","roadBumpHole"]
+roadProfile = 'roadRamps';
+% for roadProfile = ["IRI_737b","roadRamps","roadSingleBump","roadBumpHole"]
 
 load(roadProfile);
 dx = road_x(2) - road_x(1);             % spacial step for input data
@@ -158,6 +158,8 @@ end
 dt_MPC = 3*dt; % Discrete-time step for MPC (must be an integer multiple of dt)
 N = 15; % Prediction horizon
 rFlag = 1; % 0 = nominal, 1 = ...
+dFlag = 2;
+satFlag = 1;
 
 % for dt_MPC = [1, 2, 3, 4, 5, 10].*dt
 % for N = [2, 3, 5, 10, 15]
@@ -166,7 +168,9 @@ rFlag = 1; % 0 = nominal, 1 = ...
 % distrubance, 2 - full disturbance preview)
 % dFlag = 0; % 0 = nominal, 1 = next distrubance, 2 = entire horizon
 
-for dFlag = [0,1,2]
+% for dFlag = [0,1,2]
+
+% for satFlag = [0,1]
 
 
 %% Robust things:
@@ -175,14 +179,26 @@ for dFlag = [0,1,2]
 % Invariant Set (Optional)
 
 
+
+
+% Controller and setup
+K_nipotent = -acker(sys_d.A,sys_d.B(:,1),zeros(nx,1));
+A_K = sys_d.A + sys_d.B(:,1)*K_nipotent; %<--- only u_1
+W_rpi = sys_d.B(:,2)*(D_set.projection(1)); %<--- only d_1 inputs into state equation
+
+epsilon = 1;
+Z = Approx_RPI(A_K,W_rpi,epsilon); Z.minHRep;
+
+X_bar = X_set - Z; X_bar.minHRep;
+U_bar = U_set - K_nipotent*Z; U_bar.minHRep;
+
 %% Controller Design
 if true
 % mpc_test = 'mpc_bounded';
-for mpc_test = "mpc_both"%["mpc_accel","mpc_bounds","mpc_both"]
-mpc_test = sprintf('%s_N=%d_dtMPC=%d_rFlag=%d',mpc_test,N,round(dt_MPC/dt),rFlag);
+for test = "mpc_both"%["mpc_accel","mpc_bounds","mpc_both"]
 
 % From LQR Design:switch test
-switch mpc_test
+switch test
    case 'mpc_accel'
        Q = Q_lqr_accel; R = R_lqr_bounds;
    case 'mpc_bounds'
@@ -192,6 +208,9 @@ switch mpc_test
 end
 % P=0; %<--- no terminal cost
 P = Q; %<--- same terminal cost (no final-state constraint)
+
+
+mpc_test = sprintf('%s_N=%d_dtMPC=%d_rFlag=%d_dFlag=%d_satFlag=%d',test,N,round(dt_MPC/dt),rFlag,dFlag,satFlag);
 
 % Resample discrete-time model with MPC time step
 sys_MPC = d2d(sys_d, dt_MPC);
@@ -219,16 +238,6 @@ if ~rFlag
     controller = optimizer(constraints,objective,sdpsettings('solver','gurobi'),[x_(1)',d_(:)'],[u_{1}]);
 
 else
-    % Controller and setup
-    K_nipotent = -acker(sys_MPC.A,sys_MPC.B(:,1),zeros(nx,1));
-    A_K = sys_MPC.A + sys_MPC.B(:,1)*K_nipotent; %<--- only u_1
-    W_rpi = sys_MPC.B(:,2)*(D_set.projection(1)); %<--- only d_1 inputs into state equation
-    
-    epsilon = 1;
-    Z = Approx_RPI(A_K,W_rpi,epsilon); Z.minHRep;
-
-    X_bar = X_set - Z; X_bar.minHRep;
-    U_bar = U_set - K_nipotent*Z; U_bar.minHRep;
 
     % YALMIP vars
     yalmip('clear'); clear('controller');
@@ -247,16 +256,18 @@ else
         constraints = [constraints, X_bar.A*x_bar_{k} <= X_bar.b];
         constraints = [constraints, U_bar.A*u_bar_{k} <= U_bar.b];
         constraints = [constraints, x_bar_{k+1} == ...
-            sys_MPC.A*x_bar_{k} + sys_MPC.B(:,1)*u_bar_{k};% + sys_MPC.B(:,2)*d_{k}(1)];
+            sys_MPC.A*x_bar_{k} + sys_MPC.B(:,1)*u_bar_{k} ...
+            + sys_MPC.B(:,2)*d_bar_{k}(1)];
+        
         switch dFlag
             case 0
                 constraints = [constraints, D_set.A*d_bar_{k} <= D_set.b];
             case {1,2}
                 constraints = [constraints, d_bar_{k} == d_{k}];
         end
-
     end
-    constraints = [constraints, Z.A*(x_bar_{k+1}+0)<= Z.b];
+    % constraints = [constraints, Z.A*(x_bar_{k+1}+0)<= Z.b];
+    constraints = [constraints, x_bar_{k+1} == zeros(size(x_bar_{k+1}))];
     objective = objective + x_bar_{k+1}'*P*x_bar_{k+1};
 
     
@@ -270,86 +281,25 @@ end
 
 z_all = [z0dot;z0];
 
-[X,Y,U] = run_sim(sys_d, z_all, controller, x0, tspan, N, dt_MPC, dFlag, rFlag);
-
-
-
-
+[X,Y,U] = run_sim(sys_d, z_all, controller, x0, tspan, N, dt_MPC, dFlag, rFlag, satFlag,bounds);
 
 
 % Plot all simulation data
 plotActiveSuspension(tspan(1:end-1),U',X',Y',bounds)
 sgtitle(strcat('Simulation Reusults:', mpc_test,...
-    sprintf('dFlag=%d',dFlag), 'profile = ',roadProfile))
+    'profile = ',roadProfile))
 saveas(gcf,strcat(fig_subfolder,filesep,'results_',mpc_test,...
-    '_dFlag=',num2str(dFlag),'_',roadProfile,'.png'))
-
-% close all
+    '_',roadProfile,'.png'))
+close all
 end
-end
-end
-
 end
 % end
-% 
 % end
-
-% x_sim = [x0];           % Store states
-% u_sim = [];             % Store inputs
-% y_sim = [];             % Store outputs
-% s_sim = [];             % Store slack (if you use it)
-% errors = [];            % Store diagnostics
-% tCalcs = [];            % Store MPC computation times
-% z0dot2 = [z0dot z0dot]; % Extend for prediction horizon
-% % Choose what the MPC controller knows (0 - no disturbance, 1 - current
-% % distrubance, 2 - full disturbance preview)
-% dFlag = 0;
-% for i = 1:length(tspan)-1
-%     % Call controller every dt_MPC seconds
-%     if mod(i-1,dt_MPC/dt) < eps 
-%         if dFlag == 0
-%             d_MPC = mat2cell(zeros(1,N),1,ones(1,N));
-%         elseif dFlag == 1
-%             d_MPC = mat2cell(repmat(z0dot2(i+1),1,N),1,ones(1,N));
-%         elseif dFlag == 2
-%             d_MPC = mat2cell(z0dot2(i+1:dt_MPC/dt:i+dt_MPC/dt*N),1,ones(1,N));
-%         end
-%         % Modify this section as needed depending on your inputs/outputs
-%         % Define controller inputs
-% 
-%         tic
-%         [out,diagnostics] = controller{X_{k}};
-%         tCalc = toc;
-%         % Unpack controller outputs with optimal input at first time step
-%         % denoted by the variable u (to be used below)
-% 
-%         tCalcs = [tCalcs tCalc];
-%         errors = [errors, diagnostics];
-%     end
-%     % Update model every dt seconds
-%     u_sim = [u_sim u];
-%     y_sim = [y_sim sys_d.C*x_sim(:,end) + sys_d.D(:,1)*u + sys_d.D(:,2:3)*[z0dot(i+1); z0(i+1)]];
-%     x_sim = [x_sim sys_d.A*x_sim(:,end) + sys_d.B(:,1)*u + sys_d.B(:,2:3)*[z0dot(i+1); z0(i+1)]];
 % end
-% % Display diagnostics (0 = no errors)
-% max(errors)
-% % Rotate for plotting
-% x_sim = x_sim';
-% u_sim = u_sim';
-% u_sim = [u_sim;u_sim(end)];
-% u_sim = [u_sim z0dot' z0'];
-% y_sim = y_sim';
-% y_sim = [y_sim;y_sim(end,:)];
-% 
-% % Plot all simulation data
-% plotActiveSuspension(tspan,u_sim,x_sim,y_sim,bounds)
-% % Animate simulation data (can comment out if you dont want to animate)
-% % animateActiveSuspension(t,u_sim,y_sim,road_x,road_z,pos,scale)
-
-
+% end
 
 %% Local functions
-function [X,Y,U] = run_sim(sys, d_all, controller, x0, tspan, N, dt_MPC, dFlag, rFlag)
+function [X,Y,U] = run_sim(sys, d_all, controller, x0, tspan, N, dt_MPC, dFlag, rFlag, satFlag, bounds)
 
     [A,B,C,D] = ssdata(sys);
     nd = size(d_all,1);
@@ -379,12 +329,13 @@ function [X,Y,U] = run_sim(sys, d_all, controller, x0, tspan, N, dt_MPC, dFlag, 
                     u = results{1};
                 case 1
                     u_bar = results{1}; x_bar = results{2};
-                    u = u_bar + K*(X_{k} - x_bar);
             end
 
             % [u,diagnostics] = controller{X_{k},V{:}};
             % if diagnostics ~= 0; error('not feasible'); end
         end
+        if rFlag; u = + K*(X_{k} - x_bar); end
+        if satFlag; u = min(bounds.u_ub, max(bounds.u_lb,u)); end
         U_{k} = [u; d_all(:,k)];
         Y_{k} = C*X_{k} + D*U_{k};
         X_{k+1} = A*X_{k} + B*U_{k};

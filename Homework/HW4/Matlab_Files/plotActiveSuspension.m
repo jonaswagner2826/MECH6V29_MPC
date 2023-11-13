@@ -8,9 +8,9 @@ set(0,'defaultTextFontSize' , 14)
 set(0,'defaulttextinterpreter','latex')
 set(0,'defaultAxesGridLineStyle','-.')
 
-% figure('WindowStyle','normal','Position',[0,0,1000,1200])
+figure('WindowStyle','normal','Position',[0,0,1000,1200])
 % figure(1,'WindowStyle','normal','Position',[0,0,1000,1200])
-figure(1); clf;
+% figure(1); clf;
 subplot(4,2,1);hold on
 plot(t,x(:,1),'k-')
 plot([t(1) t(end)],[bounds.x_ub(1) bounds.x_ub(1)],'k--')

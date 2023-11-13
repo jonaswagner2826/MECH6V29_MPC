@@ -20,7 +20,8 @@
 % \usepackage[inline, shortlabels]{enumitem}
 \usepackage{paralist}
 \usepackage{cite}
-
+\usepackage{pdfpages}
+% \usepackage{afterpage}
 
 % Theorems
 \newtheorem{definition}{Definition}
@@ -48,7 +49,7 @@
 \title{
     MECH 6V29 - MPC - HW 4
 }
-\author{Jonas Wagner} % assuming Jonas and Justin... add Tanner?
+\author{Jonas Wagner}
 
 
 % -----------------------------------------------------
@@ -125,7 +126,7 @@ Initial open-loop dynamics are simulated with lsim() and the provided disturbanc
 From these dynamics the high oscillatory (and poor dampening) effects can easily be observed.
 The first state, tire deflection ($x_1$), was often exceeding the acceptable state bounds.
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_open_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_open_roadBumpHole.png}
@@ -134,8 +135,7 @@ The first state, tire deflection ($x_1$), was often exceeding the acceptable sta
     \caption{Open-loop dynamics for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:open-loop}
 \end{figure}
 
-
-% \newpage
+\newpage \clearpage
 % -----------------------------------------------------
 % LQR Controller Design
 % -----------------------------------------------------
@@ -158,7 +158,7 @@ For the input cost, a simple inverse bound cost was used:
 
 The simulations are provided in \autoref{fig:lqr_accel}, \autoref{fig:lqr_bounds}, and \autoref{fig:lqr_both} respectively.
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_accel_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_accel_roadBumpHole.png}
@@ -167,7 +167,7 @@ The simulations are provided in \autoref{fig:lqr_accel}, \autoref{fig:lqr_bounds
     \caption{LQR closed-loop dynamics with $Q_{accel}$ and $R$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:lqr_accel}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_bounds_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_bounds_roadBumpHole.png}
@@ -176,13 +176,13 @@ The simulations are provided in \autoref{fig:lqr_accel}, \autoref{fig:lqr_bounds
     \caption{LQR closed-loop dynamics with $Q_bounds$ and $R$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:lqr_bounds}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_both_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_both_roadBumpHole.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_both_roadRamps.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_lqr_both_roadSingleBump.png}
-    \caption{LQR closed-loop dynamics with $Q_both$ and $R$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:lqr_both}
+    \caption{LQR closed-loop dynamics with $Q_{both}$ and $R$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:lqr_both}
 \end{figure}
 
 Each of these lqr control schemes had a noticeable improvement in dampening transient response.
@@ -190,7 +190,7 @@ The demonstrative $Q$ matrices are weighted against the $R$ matrices by multiple
 
 Although it does have a noticeable improvement in response, it does not meet the ideal specs; specifically, the state bounds are still often exceeded and the oscillations still don't seem like an enjoyable ride.
 
-\newpage
+\newpage \clearpage \clearpage
 % -----------------------------------------------------
 % Simple MPC Controller Formulation
 % -----------------------------------------------------
@@ -206,26 +206,28 @@ The demonstrative plots are using $N=15$, but this selection was mostly just an 
 The integer multiplier was selected mainly by comparing a few different values.
 As can be seen in \autoref{fig:mpc_N15_dt1_d0_r0}, the case where the prediction forward is done every-single time-step the response becomes very oscillatory and the bounds are greatly exceeded.
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=1_rFlag=0_dFlag=0_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=1_rFlag=0_dFlag=0_roadBumpHole.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=1_rFlag=0_dFlag=0_roadRamps.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=1_rFlag=0_dFlag=0_roadSingleBump.png}
-    \caption{Closed-loop dynamics with no disturbance information for standard MPC using $Q_both$ and $R$ updating every time-step with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt1_d0_r0}
+    \caption{Closed-loop dynamics with no disturbance information for standard MPC using $Q_{both}$ and $R$ updating every time-step with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt1_d0_r0}
 \end{figure}
 
+\newpage \clearpage
 By comparison, as seen in \autoref{fig:mpc_N15_dt3_d0_r0}, predicting forward in increments of 3 time-steps is far less oscillatory; however this is also dependent on what $N$ is.
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=0_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=0_roadBumpHole.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=0_roadRamps.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=0_roadSingleBump.png}
-    \caption{Closed-loop dynamics with no disturbance information for standard MPC using $Q_both$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d0_r0}
+    \caption{Closed-loop dynamics with no disturbance information for standard MPC using $Q_{both}$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d0_r0}
 \end{figure}
 
+\newpage \clearpage
 \subsection{Disturbance knowledge Comparison}
 The closed-loop dynamics were also tested for when the MPC is given different levels of disturbance information:
 \begin{enumerate}
@@ -236,25 +238,26 @@ The closed-loop dynamics were also tested for when the MPC is given different le
 
 A direct comparison can be seen in \autoref{fig:mpc_N15_dt3_d1_r0},\autoref{fig:mpc_N15_dt3_d1_r0}, and \autoref{fig:mpc_N15_dt3_d2_r0}. 
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=1_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=1_roadBumpHole.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=1_roadRamps.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=1_roadSingleBump.png}
-    \caption{Closed-loop dynamics with partial disturbance information for standard MPC using $Q_both$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d1_r0}
+    \caption{Closed-loop dynamics with partial disturbance information for standard MPC using $Q_{both}$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d1_r0}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=2_IRI_737b.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=2_roadBumpHole.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=2_roadRamps.png}
     \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=0_dFlag=2_roadSingleBump.png}
-    \caption{Closed-loop dynamics with full disturbance information for standard MPC using $Q_both$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d2_r0}
+    \caption{Closed-loop dynamics with full disturbance information for standard MPC using $Q_{both}$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d2_r0}
 \end{figure}
 
-\newpage
+\newpage \clearpage
+\newpage \clearpage
 % -----------------------------------------------------
 % Robust MPC Controller Formulation
 % -----------------------------------------------------
@@ -269,27 +272,57 @@ This was also tested, although disregarded, since we had already learned better 
 
 Although I intuitively understand the constraint tightening approach more, the implementation for the RPI sets is simpler to implemented\footnote{not a great reason, but it's why I made the choice I did}, thus this was implemented.
 
-From the reference text \cite{MAYNE2005219}, the 
+When implemented there initially was a problem that although it was stable, the control input was now no longer robust as designed.
+This is likely an issue with the implimentation itself; however, in order to test how this designed system would perform, a saturation was added.
+This is shown in \autoref{fig:mpc_N15_dt3_d0_r1_sat0} and \autoref{fig:mpc_N15_dt3_d0_r1_sat1}.
+
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=1_dFlag=0_satFlag=0_IRI_737b.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=1_dFlag=0_satFlag=0_roadBumpHole.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=1_dFlag=0_satFlag=0_roadSingleBump.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=1_dFlag=0_satFlag=0_roadRamps.png}
+    \caption{Closed-loop dynamics for the unsaturated robust MPC using $Q_{both}$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d0_r1_sat0}
+\end{figure}
+
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=1_dFlag=0_satFlag=1_saturated_IRI_737b.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=1_dFlag=0_satFlag=1_saturated_roadBumpHole.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=1_dFlag=0_satFlag=1_saturated_roadSingleBump.png}
+    \includegraphics[width = 0.49 \columnwidth]{figs/results_mpc_both_N=15_dtMPC=3_rFlag=1_dFlag=0_satFlag=1_saturated_roadRamps.png}
+    \caption{Closed-loop dynamics for the saturated robust MPC using $Q_{both}$ and $R$ updating every 3 time-steps with $N=15$ for the IRI\_737b, roadBumpHole, roadRamps, and roadSingleBump road profiles.} \label{fig:mpc_N15_dt3_d0_r1_sat1}
+\end{figure}
+
+
+\section{Conclusion}
+
+As a result of completing this entire design, I would first continue to evaluate the implimentation of the robust MPC as I can only assume that it is failing on a part of my own mistakes.
+I do think that the best solution I've obtained so far was the simple MPC using $N=15$ updating every 3 time-steps (along with providing as much disturbance information that is available) and the balenced cost funciton values I decided on ($Q_{both}$ and $R$, with $P=Q_{both}$).
+That selection seemed to strike a good balance of transient dynamics for all of the cases observed, and didn't have the issues faced with the shorter time-horizons or fast updating steps.
 
 
 
+\newpage \clearpage
 
-
-
+\newpage \clearpage
 
 
 %%%%%%%%%%%%%%
 % Refrences
 %%%%%%%%%%%%%%
-
-
-
-
-
 \newpage
 \appendix
+\section{Code}
+\subsection{Github}
+See my github repo for all my course related materials: 
+\url{https://github.com/jonaswagner2826/MECH6v29_MPC}
 
-
+\subsection{Matlab results}
+MATLAB code and results are attached.
+\includepdf[pages=-]{html/HW_4.pdf}
 
 
 
